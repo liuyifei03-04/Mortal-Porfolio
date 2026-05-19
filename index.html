@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mortal.</title>
+    
+    <!-- 更换为绝对稳定的 Tailwind v3 版本的 CDN，确保不再卡死 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 引入 GSAP 动效库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;1,300&family=Inter:wght@300;400;600&display=swap');
+
+        body {
+            background-color: #EFEFEF; /* 稍微加深一点底色，确保能看清 */
+            color: #121212;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        .font-serif { font-family: 'Cormorant Garamond', serif; }
+
+        /* 微弱胶片噪点 */
+        .grain-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3e%3cfilter id='noiseFilter'%3e%3cfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3e%3c/filter%3e%3crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3e%3c/svg%3e");
+            opacity: 0.015;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* 3D 翻书样式 */
+        .book-perspective { perspective: 1200px; }
+        .book-container {
+            width: 240px; height: 340px; position: relative; transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); cursor: pointer;
+        }
+        .book-container:hover { transform: rotateY(-12deg) rotateX(4deg); }
+        .book-container.is-open { transform: rotateY(-35deg) translateX(40px); }
+        .book-page { position: absolute; width: 100%; height: 100%; top: 0; left: 0; backface-visibility: hidden; transform-origin: left center; transition: transform 0.6s; box-shadow: 5px 5px 20px rgba(0,0,0,0.1); }
+        .book-cover { z-index: 5; transform: rotateY(0deg); }
+        .book-container.is-open .book-cover { transform: rotateY(-145deg); }
+        .book-inside { background-color: #FCFAF2; z-index: 4; }
+    </style>
+</head>
+<body class="relative">
+
+    <div class="grain-overlay"></div>
+
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 left-0 w-full z-50 p-6 flex justify-between items-center text-[#121212]">
+        <a href="#" class="text-xl font-semibold tracking-widest lowercase">mortal.</a>
+        <div class="flex gap-6 text-xs font-medium tracking-widest uppercase opacity-70">
+            <a href="#cinema">01. Cinema</a>
+            <a href="#books">02. Library</a>
+        </div>
+    </nav>
+
+    <!-- 主页栏目：这次把文字加黑加粗，绝对能一眼看到 -->
+    <section class="h-screen w-full flex flex-col justify-center items-center p-8 bg-[#F4F3EF]">
+        <div id="hero-text" class="text-center">
+            <h1 class="font-serif italic text-4xl md:text-5xl font-normal tracking-wide text-stone-900 mb-6">
+                “We are all stories in the end.”
+            </h1>
+            <p class="text-xs tracking-[0.2em] uppercase font-bold text-stone-600">
+                A curated collection of temporal beauty.
+            </p>
+        </div>
+        <div class="absolute bottom-12 left-1/2 -translate-x-1/2 opacity-50 text-lg font-bold">↓ 往下滚动</div>
+    </section>
+
+    <!-- 电影栏目 -->
+    <section id="cinema" class="w-full bg-[#121212] text-[#EFEFEF] py-32 relative z-10 rounded-t-[32px]">
+        <div class="max-w-5xl mx-auto px-8">
+            <p class="text-xs tracking-[0.3em] uppercase opacity-50 mb-20">01 / FILM & LYRICS</p>
+            
+            <div class="movie-card min-h-[60vh] flex flex-col justify-center items-start mb-20 relative">
+                <div class="w-full md:w-[65%] aspect-[16/10] overflow-hidden rounded-lg bg-stone-900 shadow-2xl">
+                    <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1200" class="movie-img w-full h-full object-cover opacity-80">
+                </div>
+                <div class="movie-meta mt-8 md:absolute md:bottom-0 md:right-0 md:text-right max-w-md">
+                    <h3 class="font-serif italic text-2xl font-normal mb-2 text-white">关于莉莉周的一切</h3>
+                    <p class="text-sm font-light opacity-80 leading-relaxed">
+                        “我在这里。借着以太的力量，我就在青翠的麦田里，聆听那些残酷的青春细语。”
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 书籍栏目 -->
+    <section id="books" class="w-full bg-[#EFEFEF] text-[#121212] py-32 relative z-20 rounded-t-[32px] -mt-8 shadow-2xl">
+        <div class="max-w-5xl mx-auto px-8">
+            <p class="text-xs tracking-[0.3em] uppercase opacity-50 mb-20">02 / LIBRARY & TEXTS</p>
+            
+            <div class="flex flex-col md:flex-row gap-16 justify-center items-center py-12">
+                <!-- 书籍 1 -->
+                <div class="book-perspective flex flex-col items-center">
+                    <div class="book-container" onclick="this.classList.toggle('is-open')">
+                        <div class="book-page book-cover bg-stone-800 text-[#F4F3EF] p-6 flex flex-col justify-between border-l-4 border-stone-950 rounded-r">
+                            <span class="text-xs opacity-50 tracking-widest uppercase">Eileen Chang</span>
+                            <h4 class="font-serif italic text-xl tracking-widest py-8">倾城之恋</h4>
+                            <span class="text-[10px] opacity-50 text-right">点击翻阅 →</span>
+                        </div>
+                        <div class="book-page book-inside p-6 flex flex-col justify-between text-stone-800 border rounded-r">
+                            <p class="text-xs font-light leading-relaxed tracking-wide pt-4">
+                                “香港的陷落成全了她...也许就因为要成全她，一个大都市颠覆了。”
+                            </p>
+                            <span class="text-[9px] opacity-50 text-right">《倾城之恋》</span>
+                        </div>
+                    </div>
+                    <p class="text-xs opacity-60 mt-6 tracking-widest">张爱玲 · 1943</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // 首页文字滚动淡出
+        gsap.to("#hero-text", {
+            scrollTrigger: { trigger: "body", start: "top top", end: "30% top", scrub: true },
+            opacity: 0, y: -30
+        });
+    </script>
+</body>
+</html>
