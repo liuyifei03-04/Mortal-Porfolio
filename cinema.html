@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mortal. // Cinema</title>
+    
+    <!-- 稳定的 Tailwind v3 CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- GSAP 核心动效与滚动触发器 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@200;400;600&display=swap');
+
+        body {
+            background-color: #121212; /* 电影院级别的沉浸黑 */
+            color: #EFEFEF;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            margin: 0; padding: 0;
+        }
+
+        .font-serif { font-family: 'Cormorant Garamond', serif; }
+
+        /* 极简呼吸灯鼠标圈 */
+        #custom-cursor {
+            width: 8px; height: 8px; background-color: #EFEFEF;
+            border-radius: 50%; position: fixed; transform: translate(-50%, -50%);
+            pointer-events: none; z-index: 9999; transition: width 0.3s, height 0.3s, background-color: 0.3s;
+        }
+        #cursor-blur {
+            width: 40px; height: 40px; border: 1px solid rgba(239, 239, 239, 0.2);
+            border-radius: 50%; position: fixed; transform: translate(-50%, -50%);
+            pointer-events: none; z-index: 9998;
+        }
+
+        /* 胶片噪点 */
+        .grain-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3e%3cfilter id='noiseFilter'%3e%3cfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3e%3c/filter%3e%3crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3e%3c/svg%3e");
+            opacity: 0.02; pointer-events: none; z-index: 9990;
+        }
+
+        /* 用于支持多图叠放的 3D 容器 */
+        .photo-stack { perspective: 1000px; transform-style: preserve-3d; }
+    </style>
+</head>
+<body class="relative selection:bg-stone-200 selection:text-black">
+
+    <div class="grain-overlay"></div>
+    <div id="custom-cursor" class="hidden md:block"></div>
+    <div id="cursor-blur" class="hidden md:block"></div>
+
+    <!-- HEADER: 顶栏 -->
+    <header class="fixed top-0 left-0 w-full z-50 p-6 flex justify-between items-center mix-blend-difference">
+        <a href="index.html" class="text-xl font-light tracking-widest lowercase text-[#EFEFEF]">mortal.</a>
+        <div class="flex gap-8 text-[11px] tracking-[0.2em] uppercase font-light text-[#EFEFEF]/60">
+            <a href="cinema.html" class="text-[#EFEFEF] font-semibold border-b border-[#EFEFEF]/40 pb-1">01. Cinema</a>
+            <a href="library.html" class="hover:text-[#EFEFEF] transition-colors">02. Library</a>
+            <a href="muses.html" class="hover:text-[#EFEFEF] transition-colors">03. Muses</a>
+            <a href="clips.html" class="hover:text-[#EFEFEF] transition-colors">04. Clips</a>
+        </div>
+    </header>
+
+    <!-- CONTENT: 电影长廊 -->
+    <main class="max-w-5xl mx-auto px-8 py-32">
+        <p class="text-xs tracking-[0.3em] uppercase opacity-40 mb-28">01 / CINEMA & IMAGINATION</p>
+
+        <!-- ==================== 电影一：《关于莉莉周的一切》 ==================== -->
+        <div class="movie-section min-h-[70vh] flex flex-col md:flex-row gap-12 items-center mb-44">
+            <!-- 视觉大招：三图重叠散开盒子 -->
+            <div class="photo-stack w-full md:w-[55%] aspect-[16/10] relative group cursor-pointer">
+                <!-- 剧照 3（最底层） -->
+                <img src="https://images.unsplash.com/photo-1518173946687-a4c8a383392e?q=80&w=800" 
+                     class="absolute inset-0 w-full h-full object-cover rounded-lg shadow-md transform rotate-3 group-hover:rotate-12 group-hover:translate-x-12 group-hover:-translate-y-4 transition-all duration-700 filter grayscale contrast-125 opacity-40 group-hover:opacity-60 group-hover:grayscale-0">
+                <!-- 剧照 2（中间层） -->
+                <img src="https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?q=80&w=800" 
+                     class="absolute inset-0 w-full h-full object-cover rounded-lg shadow-lg transform -rotate-2 group-hover:-rotate-6 group-hover:-translate-x-8 group-hover:-translate-y-2 transition-all duration-700 filter grayscale contrast-125 opacity-60 group-hover:opacity-80 group-hover:grayscale-0">
+                <!-- 剧照 1（最上层 - 主图） -->
+                <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1200" 
+                     class="absolute inset-0 w-full h-full object-cover rounded-lg shadow-2xl transition-all duration-700 filter grayscale contrast-125 group-hover:grayscale-0">
+            </div>
+            <!-- 文字侧边栏 -->
+            <div class="w-full md:w-[40%] text-left mt-6 md:mt-0">
+                <span class="text-[10px] tracking-widest text-stone-500 uppercase font-light">FILM // 01</span>
+                <h3 class="font-serif italic text-2xl font-light text-white mt-1 mb-4">关于莉莉周的一切</h3>
+                <p class="text-xs font-light text-[#EFEFEF]/60 leading-relaxed tracking-wide">
+                    “我在这里。借着以太的力量，我就在青翠的麦田里，聆听那些残酷的青春细语。”
+                </p>
+            </div>
+        </div>
+
+        <!-- ==================== 电影二：《过春天》 ==================== -->
+        <div class="movie-section min-h-[70vh] flex flex-col md:flex-row-reverse gap-12 items-center mb-44">
+            <!-- 三图重叠散开盒子 -->
+            <div class="photo-stack w-full md:w-[55%] aspect-[16/10] relative group cursor-pointer">
+                <!-- 剧照 3 -->
+                <img src="https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?q=80&w=800" 
+                     class="absolute inset-0 w-full h-full object-cover rounded-lg shadow-md transform -rotate-4 group-hover:-rotate-12 group-hover:-translate-x-12 group-hover:-translate-y-4 transition-all duration-700 filter grayscale contrast-125 opacity-40 group-hover:opacity-60 group-hover:grayscale-0">
+                <!-- 剧照 2 -->
+                <img src="https://images.unsplash.com/photo-1472214222555-d404758b1c42?q=80&w=800" 
+                     class="absolute inset-0 w-full h-full object-cover rounded-lg shadow-lg transform rotate-2 group-hover:rotate-6 group-hover:translate-x-8 group-hover:-translate-y-2 transition-all duration-700 filter grayscale contrast-125 opacity-60 group-hover:opacity-80 group-hover:grayscale-0">
+                <!-- 剧照 1 -->
+                <img src="https://images.unsplash.com/photo-1514306191717-452ec28c7814?q=80&w=1200" 
+                     class="absolute inset-0 w-full h-full object-cover rounded-lg shadow-2xl transition-all duration-700 filter grayscale contrast-125 group-hover:grayscale-0">
+            </div>
+            <!-- 文字侧边栏 -->
+            <div class="w-full md:w-[40%] text-left mt-6 md:mt-0">
+                <span class="text-[10px] tracking-widest text-stone-500 uppercase font-light">FILM // 02</span>
+                <h3 class="font-serif italic text-2xl font-light text-white mt-1 mb-4">过春天</h3>
+                <p class="text-xs font-light text-[#EFEFEF]/60 leading-relaxed tracking-wide">
+                    “香港的雨，深圳的太阳。十六岁的少女身上绑着微弱的轰鸣，那是我义无反顾游过去的一场春天。”
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 极简返回大厅注脚 -->
+    <footer class="py-20 text-center">
+        <a href="index.html" class="inline-block text-[10px] tracking-[0.25em] uppercase border border-[#EFEFEF]/20 rounded-full px-6 py-2.5 hover:bg-[#EFEFEF] hover:text-[#121212] transition-all duration-500">
+            ← Return To Main Hall
+        </a>
+    </footer>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // 1. 磁性鼠标跟随
+        const cursor = document.getElementById('custom-cursor');
+        const blur = document.getElementById('cursor-blur');
+        document.addEventListener('mousemove', (e) => {
+            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1 });
+            gsap.to(blur, { x: e.clientX, y: e.clientY, duration: 0.2 });
+        });
+
+        // 鼠标悬停在卡片上时鼠标圈变成大十字或特定样式
+        document.querySelectorAll('a, .photo-stack').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                cursor.style.width = '20px'; cursor.style.height = '20px';
+                cursor.style.backgroundColor = 'rgba(239,239,239,0.2)';
+            });
+            item.addEventListener('mouseleave', () => {
+                cursor.style.width = '8px'; cursor.style.height = '8px';
+                cursor.style.backgroundColor = '#EFEFEF';
+            });
+        });
+
+        // 2. 电影内容在滚动进入视口时慢速无感淡入
+        document.querySelectorAll('.movie-section').forEach((section) => {
+            gsap.from(section, {
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top 85%",
+                    toggleActions: "play none none reverse"
+                },
+                opacity: 0,
+                y: 40,
+                duration: 1.2,
+                ease: "power2.out"
+            });
+        });
+    </script>
+</body>
+</html>
