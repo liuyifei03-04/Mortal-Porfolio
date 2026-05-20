@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mortal.</title>
+    <title>mortal. // A Curated Museum</title>
     
     <!-- 稳定的 Tailwind v3 CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- GSAP 核心动效库与滚动触发插件 -->
+    <!-- GSAP 核心动效 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@200;400;600&display=swap');
@@ -18,331 +17,99 @@
             background-color: #F4F3EF; /* 喜茶燕麦白 */
             color: #121212;
             font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
+            overflow: hidden; /* 首页作为纯粹的大门，不需要滚动条 */
             margin: 0; padding: 0;
         }
 
         .font-serif { font-family: 'Cormorant Garamond', serif; }
+
+        /* 极简呼吸灯鼠标圈（高级交互大招 1） */
+        #custom-cursor {
+            width: 8px; height: 8px; background-color: #121212;
+            border-radius: 50%; position: fixed; transform: translate(-50%, -50%);
+            pointer-events: none; z-index: 9999; transition: width 0.3s, height 0.3s, background-color: 0.3s;
+        }
+        #cursor-blur {
+            width: 40px; height: 40px; border: 1px solid rgba(18, 18, 18, 0.2);
+            border-radius: 50%; position: fixed; transform: translate(-50%, -50%);
+            pointer-events: none; z-index: 9998;
+        }
 
         /* 1% 胶片噪点 */
         .grain-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3e%3cfilter id='noiseFilter'%3e%3cfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3e%3c/filter%3e%3crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3e%3c/svg%3e");
-            opacity: 0.012;
-            pointer-events: none;
-            z-index: 9999;
+            opacity: 0.015; pointer-events: none; z-index: 9990;
         }
-
-        /* 3D 翻书 */
-        .book-perspective { perspective: 1000px; }
-        .book-container {
-            width: 190px; height: 270px; position: relative; transform-style: preserve-3d;
-            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); cursor: pointer;
-        }
-        .book-container:hover { transform: rotateY(-10deg) rotateX(4deg); }
-        .book-container.is-open { transform: rotateY(-35deg) translateX(30px); }
-        .book-page { position: absolute; width: 100%; height: 100%; top: 0; left: 0; backface-visibility: hidden; transform-origin: left center; transition: transform 0.6s; box-shadow: 4px 4px 15px rgba(0,0,0,0.08); }
-        .book-cover { z-index: 5; transform: rotateY(0deg); }
-        .book-container.is-open .book-cover { transform: rotateY(-145deg); }
-        .book-inside { background-color: #FCFAF2; z-index: 4; }
-
-        /* 丝滑平滑滚动 */
-        html { scroll-behavior: smooth; }
     </style>
 </head>
-<body class="relative">
+<body class="h-screen w-screen flex flex-col justify-between p-8 relative selection:bg-stone-800 selection:text-white">
 
+    <!-- 胶片噪点与自定义鼠标 -->
     <div class="grain-overlay"></div>
+    <div id="custom-cursor" class="hidden md:block"></div>
+    <div id="cursor-blur" class="hidden md:block"></div>
 
-    <!-- 极简固定导航栏 -->
-    <nav class="fixed top-0 left-0 w-full z-50 p-6 flex justify-between items-center mix-blend-difference text-[#121212]">
-        <a href="#" class="text-lg font-light tracking-widest lowercase">mortal.</a>
-        <div class="flex gap-6 text-[10px] tracking-widest uppercase opacity-60">
-            <a href="#cinema" class="hover:opacity-100 transition-opacity">01. Cinema</a>
-            <a href="#books" class="hover:opacity-100 transition-opacity">02. Library</a>
-            <a href="#muses" class="hover:opacity-100 transition-opacity">03. Muses</a>
-            <a href="#clips" class="hover:opacity-100 transition-opacity">04. Clips</a>
+    <!-- HEADER: 导航大门 -->
+    <header class="w-full flex justify-between items-center z-50">
+        <a href="index.html" class="text-xl font-light tracking-widest lowercase hover:opacity-50 transition-opacity">mortal.</a>
+        <!-- 注意：这里的链接全部改成了跳转到独立的网页文件 -->
+        <div class="flex gap-8 text-[11px] tracking-[0.2em] uppercase opacity-60 font-light">
+            <a href="cinema.html" class="nav-link hover:opacity-100 transition-opacity">01. Cinema</a>
+            <a href="library.html" class="nav-link hover:opacity-100 transition-opacity">02. Library</a>
+            <a href="muses.html" class="nav-link hover:opacity-100 transition-opacity">03. Muses</a>
+            <a href="clips.html" class="nav-link hover:opacity-100 transition-opacity">04. Clips</a>
         </div>
-    </nav>
+    </header>
 
-    <!-- SECTION 1: 纯白留白主页 -->
-    <section class="h-screen w-full flex flex-col justify-center items-center p-8 bg-[#F4F3EF]">
-        <div id="hero-text" class="text-center">
-            <h1 class="font-serif italic text-4xl md:text-5xl font-light tracking-wide text-stone-800 mb-4">
+    <!-- CENTER: 纯白大厅高光 -->
+    <main class="flex-1 flex flex-col justify-center items-center">
+        <div id="hero-center" class="text-center opacity-0 transform translate-y-4">
+            <h1 class="font-serif italic text-4xl md:text-6xl font-light tracking-wide text-stone-800 mb-6 select-none">
                 “We are all stories in the end.”
             </h1>
-            <p class="text-[10px] tracking-[0.25em] uppercase opacity-40 font-light">
-                A curated collection of temporal beauty.
+            <p class="text-[10px] tracking-[0.3em] uppercase opacity-40 font-light block mb-8">
+                A curated space of temporal beauty and fragments.
             </p>
+            <!-- 进入按钮 -->
+            <a href="cinema.html" class="inline-block text-[10px] tracking-[0.25em] uppercase border border-stone-800/30 rounded-full px-6 py-2.5 hover:bg-stone-800 hover:text-[#F4F3EF] transition-all duration-500">
+                Enter Exhibition →
+            </a>
         </div>
-        <div class="absolute bottom-12 left-1/2 -translate-x-1/2 opacity-30 text-xs tracking-widest">↓ SCROLL</div>
-    </section>
+ main>
 
-    <!-- SECTION 2: 01. CINEMA (电影与台词) -->
-    <section id="cinema" class="w-full bg-[#121212] text-[#EFEFEF] py-32 relative z-10 rounded-t-[32px]">
-        <div class="max-w-5xl mx-auto px-8">
-            <p class="text-xs tracking-[0.3em] uppercase opacity-40 mb-28">01 / CINEMA & IMAGINATION</p>
-            
-            <!-- 电影 1：《关于莉莉周的一切》 -->
-            <div class="movie-card min-h-[70vh] flex flex-col justify-center items-start mb-32 relative">
-                <div class="w-full md:w-[65%] aspect-[16/10] overflow-hidden rounded-lg bg-stone-900 shadow-2xl">
-                    <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1200" class="movie-img w-full h-full object-cover opacity-60 filter grayscale hover:grayscale-0 transition-all duration-1000">
-                </div>
-                <div class="movie-meta mt-6 md:absolute md:bottom-0 md:right-0 md:text-right max-w-sm">
-                    <h3 class="font-serif italic text-xl font-light mb-2 text-white">关于莉莉周的一切</h3>
-                    <p class="text-xs font-light opacity-60 leading-relaxed">
-                        “我在这里。借着以太的力量，我就在青翠的麦田里，聆听那些残酷的青春细语。”
-                    </p>
-                </div>
-            </div>
-
-            <!-- 电影 2：《过春天》 -->
-            <div class="movie-card min-h-[70vh] flex flex-col justify-center items-end mb-32 relative">
-                <div class="w-full md:w-[65%] aspect-[16/10] overflow-hidden rounded-lg bg-stone-900 shadow-2xl">
-                    <img src="https://images.unsplash.com/photo-1514306191717-452ec28c7814?q=80&w=1200" class="movie-img w-full h-full object-cover opacity-60 filter grayscale hover:grayscale-0 transition-all duration-1000">
-                </div>
-                <div class="movie-meta mt-6 md:absolute md:bottom-0 md:left-0 text-left max-w-sm">
-                    <h3 class="font-serif italic text-xl font-light mb-2 text-white">过春天</h3>
-                    <p class="text-xs font-light opacity-60 leading-relaxed">
-                        “香港的雨，深圳的太阳。十六岁的少女身上绑着微弱的轰鸣，那是我义无反顾游过去的一场春天。”
-                    </p>
-                </div>
-            </div>
-
-            <!-- 电影 3：《蓝色大门》 -->
-            <div class="movie-card min-h-[70vh] flex flex-col justify-center items-start mb-32 relative">
-                <div class="w-full md:w-[65%] aspect-[16/10] overflow-hidden rounded-lg bg-stone-900 shadow-2xl">
-                    <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200" class="movie-img w-full h-full object-cover opacity-60 filter grayscale hover:grayscale-0 transition-all duration-1000">
-                </div>
-                <div class="movie-meta mt-6 md:absolute md:bottom-0 md:right-0 md:text-right max-w-sm">
-                    <h3 class="font-serif italic text-xl font-light mb-2 text-white">蓝色大门</h3>
-                    <p class="text-xs font-light opacity-60 leading-relaxed">
-                        “三年一个夏天，留下什么，我们就变成什么样的大人。好多年后，我闭上眼睛，还能看到你在阳光下骑单车的背影。”
-                    </p>
-                </div>
-            </div>
-
-            <!-- 电影 4：《海边的曼彻斯特》 -->
-            <div class="movie-card min-h-[70vh] flex flex-col justify-center items-end mb-32 relative">
-                <div class="w-full md:w-[65%] aspect-[16/10] overflow-hidden rounded-lg bg-stone-900 shadow-2xl">
-                    <img src="https://images.unsplash.com/photo-1505118380757-91f5f5632de0?q=80&w=1200" class="movie-img w-full h-full object-cover opacity-60 filter grayscale hover:grayscale-0 transition-all duration-1000">
-                </div>
-                <div class="movie-meta mt-6 md:absolute md:bottom-0 md:left-0 text-left max-w-sm">
-                    <h3 class="font-serif italic text-xl font-light mb-2 text-white">海边的曼彻斯特</h3>
-                    <p class="text-xs font-light opacity-60 leading-relaxed">
-                        “I can't beat it. 我撑不下去了。但没关系，有些冬天的冰雪不需要融化，有些人注定带着不治之症活下去。”
-                    </p>
-                </div>
-            </div>
-
-            <!-- 电影 5：《怪物》 -->
-            <div class="movie-card min-h-[70vh] flex flex-col justify-center items-start mb-16 relative">
-                <div class="w-full md:w-[65%] aspect-[16/10] overflow-hidden rounded-lg bg-stone-900 shadow-2xl">
-                    <img src="https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=1200" class="movie-img w-full h-full object-cover opacity-60 filter grayscale hover:grayscale-0 transition-all duration-1000">
-                </div>
-                <div class="movie-meta mt-6 md:absolute md:bottom-0 md:right-0 md:text-right max-w-sm">
-                    <h3 class="font-serif italic text-xl font-light mb-2 text-white">怪物</h3>
-                    <p class="text-xs font-light opacity-60 leading-relaxed">
-                        “谁是怪物？在不被理解的森林尽头，只有我们知道，废弃车厢里的宇宙才是唯一的真实。”
-                    </p>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- SECTION 3: 02. LIBRARY (书籍推荐 - 点击3D翻书) -->
-    <section id="books" class="w-full bg-[#EFEFEF] text-[#121212] py-32 relative z-20 rounded-t-[32px] -mt-8 shadow-2xl">
-        <div class="max-w-5xl mx-auto px-8">
-            <p class="text-xs tracking-[0.3em] uppercase opacity-40 mb-24">02 / LIBRARY & FRAGMENTS</p>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 justify-items-center">
-                
-                <!-- 书籍 1 -->
-                <div class="book-perspective flex flex-col items-center">
-                    <div class="book-container" onclick="this.classList.toggle('is-open')">
-                        <div class="book-page book-cover bg-stone-800 text-[#F4F3EF] p-5 flex flex-col justify-between border-l-4 border-stone-950 rounded-r">
-                            <span class="text-[10px] opacity-40 tracking-widest uppercase">Eileen Chang</span>
-                            <h4 class="font-serif italic text-lg tracking-widest py-4">倾城之恋</h4>
-                            <span class="text-[9px] opacity-30 text-right">TAP →</span>
-                        </div>
-                        <div class="book-page book-inside p-5 flex flex-col justify-between text-stone-800 border rounded-r">
-                            <p class="text-[11px] font-light leading-relaxed tracking-wide pt-2">
-                                “香港的陷落成全了她。但是在不可理喻的世界里，谁知道什么是因什么是果？也许就因为要成全她，一个大都市颠覆了。”
-                            </p>
-                            <span class="text-[8px] opacity-40 text-right">《倾城之恋》</span>
-                        </div>
-                    </div>
-                    <p class="text-xs opacity-50 mt-4 tracking-widest">张爱玲 · 1943</p>
-                </div>
-
-                <!-- 书籍 2 -->
-                <div class="book-perspective flex flex-col items-center">
-                    <div class="book-container" onclick="this.classList.toggle('is-open')">
-                        <div class="book-page book-cover bg-stone-900 text-[#F4F3EF] p-5 flex flex-col justify-between border-l-4 border-black rounded-r">
-                            <span class="text-[10px] opacity-40 tracking-widest uppercase">Pai Hsien-yung</span>
-                            <h4 class="font-serif italic text-lg tracking-widest py-4">孽子</h4>
-                            <span class="text-[9px] opacity-30 text-right">TAP →</span>
-                        </div>
-                        <div class="book-page book-inside p-5 flex flex-col justify-between text-stone-800 border rounded-r">
-                            <p class="text-[11px] font-light leading-relaxed tracking-wide pt-2">
-                                “写给那一群，在最深最深的黑夜里，独自彷徨街头，无依无靠的孩子们。愿你们在尘世的黑暗中，能找到那一抹属于自己的光。”
-                            </p>
-                            <span class="text-[8px] opacity-40 text-right">《孽子》</span>
-                        </div>
-                    </div>
-                    <p class="text-xs opacity-50 mt-4 tracking-widest">白先勇 · 1983</p>
-                </div>
-
-                <!-- 书籍 3 -->
-                <div class="book-perspective flex flex-col items-center">
-                    <div class="book-container" onclick="this.classList.toggle('is-open')">
-                        <div class="book-page book-cover bg-amber-900 text-[#F4F3EF] p-5 flex flex-col justify-between border-l-4 border-amber-950 rounded-r">
-                            <span class="text-[10px] opacity-40 tracking-widest uppercase">San Mao</span>
-                            <h4 class="font-serif italic text-lg tracking-widest py-4">雨季不再来</h4>
-                            <span class="text-[9px] opacity-30 text-right">TAP →</span>
-                        </div>
-                        <div class="book-page book-inside p-5 flex flex-col justify-between text-stone-800 border rounded-r">
-                            <p class="text-[11px] font-light leading-relaxed tracking-wide pt-2">
-                                “有时候，我多么希望有一双睿智的眼睛看穿我的一切。我知道那段雨季漫长得让人沮丧，但请相信，它终究会不再来。”
-                            </p>
-                            <span class="text-[8px] opacity-40 text-right">《雨季不再来》</span>
-                        </div>
-                    </div>
-                    <p class="text-xs opacity-50 mt-4 tracking-widest">三毛 · 1976</p>
-                </div>
-
-                <!-- 书籍 4 -->
-                <div class="book-perspective flex flex-col items-center">
-                    <div class="book-container" onclick="this.classList.toggle('is-open')">
-                        <div class="book-page book-cover bg-sky-950 text-[#F4F3EF] p-5 flex flex-col justify-between border-l-4 border-black rounded-r">
-                            <span class="text-[10px] opacity-40 tracking-widest uppercase">J.K. Rowling</span>
-                            <h4 class="font-serif italic text-lg tracking-widest py-4">哈利波特</h4>
-                            <span class="text-[9px] opacity-30 text-right">TAP →</span>
-                        </div>
-                        <div class="book-page book-inside p-5 flex flex-col justify-between text-stone-800 border rounded-r">
-                            <p class="text-[11px] font-light leading-relaxed tracking-wide pt-2">
-                                “决定我们成为什么样的人的，不是我们的能力，而是我们的选择。只要九又四分之三站台还在，魔法就从未在平凡的生活中退场。”
-                            </p>
-                            <span class="text-[8px] opacity-40 text-right">《哈利波特》</span>
-                        </div>
-                    </div>
-                    <p class="text-xs opacity-50 mt-4 tracking-widest">J.K. 罗琳 · 1997</p>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- SECTION 4: 03. MUSES (海粼与文淇 - 喜茶错落排版) -->
-    <section id="muses" class="w-full bg-[#F4F3EF] text-[#121212] py-32 relative z-30 rounded-t-[32px] -mt-8 shadow-2xl">
-        <div class="max-w-5xl mx-auto px-8">
-            <p class="text-xs tracking-[0.3em] uppercase opacity-40 mb-24">03 / INSPIRATIONAL MUSES</p>
-            
-            <!-- 喜茶风左右双折不对称网格 -->
-            <div class="flex flex-col md:flex-row gap-16 items-start justify-between">
-                
-                <!-- 左双栏：姜海粼 (HAERIN) -->
-                <div class="w-full md:w-[45%] flex flex-col">
-                    <div class="overflow-hidden rounded-xl bg-stone-300 shadow-xl group aspect-[3/4] relative">
-                        <!-- 借用高级时尚猫系复古感觉意象图，你可以替换成真图 -->
-                        <img src="haerin.jpg" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 filter grayscale contrast-125">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 p-6 flex flex-col justify-end text-white">
-                            <span class="text-[10px] tracking-widest uppercase opacity-60">01 / NEWJEANS</span>
-                            <h4 class="font-serif italic text-2xl tracking-wider">HAERIN</h4>
-                        </div>
-                    </div>
-                    <div class="mt-6 border-l-2 border-stone-800 pl-4">
-                        <p class="text-xs font-semibold uppercase tracking-widest text-stone-400">MUSE A // 猫系复古</p>
-                        <p class="text-xs font-light text-stone-600 mt-2 leading-relaxed">
-                            Y2K 千禧复古浪潮下的灵动猫系少女。在节制的镜头前展现出超越年龄的沉稳与高级美感。
-                        </p>
-                    </div>
-                </div>
-
-                <!-- 右双栏：文淇 (CHEN WENQI) -->
-                <div class="w-full md:w-[45%] flex flex-col md:mt-24">
-                    <div class="overflow-hidden rounded-xl bg-stone-300 shadow-xl group aspect-[3/4] relative">
-                        <!-- 借用高级清冷文艺、充满故事感意象图 -->
-                        <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=1000" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 filter grayscale contrast-125">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 p-6 flex flex-col justify-end text-white">
-                            <span class="text-[10px] tracking-widest uppercase opacity-60">02 / ACTRESS</span>
-                            <h4 class="font-serif italic text-2xl tracking-wider">WENQI</h4>
-                        </div>
-                    </div>
-                    <div class="mt-6 border-l-2 border-stone-800 pl-4">
-                        <p class="text-xs font-semibold uppercase tracking-widest text-stone-400">MUSE B // 文艺清冷</p>
-                        <p class="text-xs font-light text-stone-600 mt-2 leading-relaxed">
-                            骨子里带着清冷、叛逆与倔强的故事感。眼神中蕴含着电影银幕般的复杂叙事。
-                        </p>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- SECTION 5: 04. CLIPS (剪辑作品 - Apple官网缩放全屏特效) -->
-    <section id="clips" class="w-full bg-[#121212] text-[#EFEFEF] py-32 relative z-40 rounded-t-[32px] -mt-8">
-        <div class="max-w-5xl mx-auto px-8 mb-16">
-            <p class="text-xs tracking-[0.3em] uppercase opacity-40">04 / MOTION CLIPS & EDITING</p>
-        </div>
-        
-        <!-- Apple 视差缩放容器 -->
-        <div id="video-trigger" class="w-full flex justify-center items-center min-h-screen relative overflow-hidden">
-            <div id="video-container" class="w-[60%] aspect-[16/9] bg-stone-900 rounded-2xl overflow-hidden shadow-2xl relative">
-                <!-- 这里我嵌入了一个高级电影感的风景循环视频作为剪辑作品的替代，可以换成你自己的B站/Pexels视频直链 -->
-                <video src="https://assets.mixkit.co/videos/preview/mixkit-cinematic-foggy-pine-forest-and-mountains-41712-large.mp4" 
-                       autoplay loop muted playsinline 
-                       class="w-full h-full object-cover opacity-80"></video>
-                <div class="absolute inset-0 flex flex-col justify-end p-8 bg-gradient-to-t from-black/70 to-transparent">
-                    <p class="text-xs tracking-widest uppercase text-stone-400 mb-1">SELECTED REEL</p>
-                    <h3 class="text-xl font-light tracking-wide font-serif italic text-white">我的剪辑作品辑锦</h3>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 底部注脚 -->
-    <footer class="bg-[#121212] text-[#EFEFEF] py-12 text-center border-t border-stone-900 relative z-40 text-[10px] tracking-widest uppercase opacity-30">
-        © 2026 mortal. all stories are temporary.
+    <!-- FOOTER: 极简注脚 -->
+    <footer class="w-full flex justify-between items-center text-[9px] tracking-widest uppercase opacity-30 z-50">
+        <span>Curated by you.</span>
+        <span>© 2026 all stories are temporary.</span>
     </footer>
 
-    <!-- 动效脚本 -->
     <script>
-        gsap.registerPlugin(ScrollTrigger);
-
-        // 1. 首页文字滚动淡出
-        gsap.to("#hero-text", {
-            scrollTrigger: { trigger: "body", start: "top top", end: "25% top", scrub: true },
-            opacity: 0, y: -40
+        // 1. 鼠标跟随大招
+        const cursor = document.getElementById('custom-cursor');
+        const blur = document.getElementById('cursor-blur');
+        
+        document.addEventListener('mousemove', (e) => {
+            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1 });
+            gsap.to(blur, { x: e.clientX, y: e.clientY, duration: 0.2 });
         });
 
-        // 2. 电影卡片进入视差
-        document.querySelectorAll('.movie-card').forEach((card) => {
-            const img = card.querySelector('.movie-img');
-            const meta = card.querySelector('.movie-meta');
-            gsap.fromTo(img, { y: 30 }, {
-                y: -30,
-                scrollTrigger: { trigger: card, start: "top bottom", end: "bottom top", scrub: 1 }
+        // 鼠标移入链接时圈圈放大（高级吸附感）
+        document.querySelectorAll('a, .nav-link').forEach(link => {
+            link.addEventListener('mouseenter', () => {
+                cursor.style.width = '24px'; cursor.style.height = '24px';
+                cursor.style.backgroundColor = 'rgba(18,18,18,0.1)';
             });
-            gsap.from(meta, {
-                scrollTrigger: { trigger: card, start: "top 80%", toggleActions: "play none none reverse" },
-                opacity: 0, y: 20, duration: 1, ease: "power2.out"
+            link.addEventListener('mouseleave', () => {
+                cursor.style.width = '8px'; cursor.style.height = '8px';
+                cursor.style.backgroundColor = '#121212';
             });
         });
 
-        // 3. Apple 官网式视频滚动全屏放大动画
-        gsap.to("#video-container", {
-            width: "100%",
-            borderRadius: "0px",
-            scrollTrigger: {
-                trigger: "#video-trigger",
-                start: "top center",
-                end: "bottom center",
-                scrub: true
-            }
+        // 2. 页面开场文字丝滑浮现动画
+        window.addEventListener('DOMContentLoaded', () => {
+            gsap.to("#hero-center", { opacity: 1, y: 0, duration: 1.8, ease: "power3.out", delay: 0.2 });
         });
     </script>
 </body>
