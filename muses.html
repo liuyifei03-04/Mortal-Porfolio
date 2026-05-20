@@ -7,7 +7,7 @@
     
     <!-- 稳定的 Tailwind v3 CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- GSAP 核心动效与滚动触发器 -->
+    <!-- GSAP 核心动效库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     
@@ -25,7 +25,7 @@
         .font-serif-eng { font-family: 'Cormorant Garamond', serif; }
         .font-serif-zh { font-family: 'Noto Serif SC', serif; }
 
-        /* 极简呼吸灯鼠标圈 */
+        /* 极简鼠标圈 */
         #custom-cursor {
             width: 8px; height: 8px; background-color: #EFEFEF;
             border-radius: 50%; position: fixed; transform: translate(-50%, -50%);
@@ -37,6 +37,48 @@
             pointer-events: none; z-index: 9998;
         }
 
+        /* 🃏 3D 卡牌翻转核心舞台 */
+        .card-perspective {
+            perspective: 1200px; /* 赋予高度写实的 3D 纵深感 */
+        }
+
+        .card-container {
+            width: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.1); /* 带有一点点回弹的高级物理感 */
+            cursor: pointer;
+        }
+
+        /* 状态控制：激活时水平翻转 180 度 */
+        .card-container.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        /* 正反面共有属性 */
+        .card-front, .card-back {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            backface-visibility: hidden; /* 关键：背靠背时隐藏背面，防止穿帮 */
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        /* A面：正面（图片海报层） */
+        .card-front {
+            z-index: 2;
+            transform: rotateY(0deg);
+            background: #1a1a1a;
+        }
+
+        /* B面：背面（情书/台词文字层） */
+        .card-back {
+            transform: rotateY(180deg); /* 初始状态就是反过来的 */
+            background: #1c1c1c;
+            border: 1px solid rgba(239, 239, 239, 0.1);
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
+        }
+
         /* 胶片噪点 */
         .grain-overlay {
             position: fixed;
@@ -45,7 +87,6 @@
             opacity: 0.02; pointer-events: none; z-index: 9990;
         }
 
-        /* 隐藏滚动条 */
         ::-webkit-scrollbar { width: 0px; background: transparent; }
     </style>
 </head>
@@ -67,69 +108,125 @@
     </header>
 
     <!-- MAIN CONTAINER -->
-    <main class="max-w-6xl mx-auto px-8 py-32 min-h-screen">
-        <p class="text-xs tracking-[0.3em] uppercase opacity-40 mb-32">03 / MUSES & VISUAL INSPIRATIONS</p>
+    <main class="max-w-5xl mx-auto px-8 py-32 min-h-screen">
+        <p class="text-xs tracking-[0.3em] uppercase opacity-40 mb-32">03 / MUSES & PRIVATE COLLECTION // CLICK TO FLIP</p>
 
-        <!-- 🔮 错位视差流体画廊网格 -->
+        <!-- 🔮 错位视差 3D 翻转卡牌舞台 -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-32 relative z-10">
             
-            <!-- 灵感卡片 1：慢速上升（数据速差：-60） -->
-            <div class="muse-card space-y-4" data-speed="-60">
-                <div class="overflow-hidden aspect-[3/4] bg-stone-900 rounded-sm">
-                    <img src="https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?q=80&w=800" 
-                         class="w-full h-full object-cover grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-700 ease-out scale-105 hover:scale-100" alt="Muse 1">
-                </div>
-                <div class="flex justify-between items-start pt-2">
-                    <div>
-                        <h3 class="text-base font-light font-serif-zh text-stone-300">流动的寂静</h3>
-                        <p class="text-[10px] tracking-widest uppercase text-stone-600 mt-1">Composition / No. 109</p>
+            <!-- 🃏 卡牌 1：爱豆收藏卡（慢速上升） -->
+            <div class="muse-card space-y-4" data-speed="-50">
+                <div class="card-perspective w-full aspect-[3/4]">
+                    <div class="card-container w-full h-full">
+                        <!-- 正面：帅气神图 -->
+                        <div class="card-front">
+                            <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=600" 
+                                 class="w-full h-full object-cover grayscale opacity-70 hover:opacity-100 transition-all duration-500" alt="Idol 1">
+                        </div>
+                        <!-- 背面：安利/金句 -->
+                        <div class="card-back flex flex-col justify-between p-8 text-left">
+                            <span class="font-serif-eng italic text-stone-600 text-xs tracking-widest">IDOL // COLLECTION</span>
+                            <div class="space-y-4 my-auto">
+                                <h4 class="text-lg font-light text-white font-serif-zh tracking-wide">星光落入眼底</h4>
+                                <p class="text-xs text-stone-400 font-serif-zh font-light leading-relaxed">“你是舞台中央绝对的无冕之王。从籍籍无名的练习室到万众瞩目的万人体育场，那些为你亮起的每一盏灯，都是你踏碎黑夜留下的勋章。”</p>
+                            </div>
+                            <span class="text-[9px] text-stone-700 tracking-widest font-serif-eng">THE DEAREST ONE.</span>
+                        </div>
                     </div>
-                    <span class="font-serif-eng italic text-stone-700 text-xs">2026 //</span>
+                </div>
+                <div class="flex justify-between items-start pt-1 px-1">
+                    <div>
+                        <h3 class="text-sm font-light font-serif-zh text-stone-300">My Muse // 爱豆暂存箱</h3>
+                        <p class="text-[9px] tracking-widest uppercase text-stone-600 mt-1">Live Stage / Shiny Moments</p>
+                    </div>
+                    <span class="font-serif-eng italic text-stone-700 text-xs">A-Side</span>
                 </div>
             </div>
 
-            <!-- 灵感卡片 2：快速上升（数据速差：40，且带有顶部的对齐偏移） -->
-            <div class="muse-card space-y-4 md:mt-48" data-speed="40">
-                <div class="overflow-hidden aspect-[4/5] bg-stone-900 rounded-sm">
-                    <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=800" 
-                         class="w-full h-full object-cover grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-700 ease-out scale-105 hover:scale-100" alt="Muse 2">
-                </div>
-                <div class="flex justify-between items-start pt-2">
-                    <div>
-                        <h3 class="text-base font-light font-serif-zh text-stone-300">矛盾的秩序</h3>
-                        <p class="text-[10px] tracking-widest uppercase text-stone-600 mt-1">Abstract Form / Structural</p>
+            <!-- 🃏 卡牌 2：动漫本命卡（快速上升） -->
+            <div class="muse-card space-y-4 md:mt-40" data-speed="40">
+                <div class="card-perspective w-full aspect-[3/4]">
+                    <div class="card-container w-full h-full">
+                        <!-- 正面：动漫经典视觉 -->
+                        <div class="card-front">
+                            <img src="https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=600" 
+                                 class="w-full h-full object-cover grayscale opacity-70 hover:opacity-100 transition-all duration-500" alt="Anime 1">
+                        </div>
+                        <!-- 背面：震撼台词 -->
+                        <div class="card-back flex flex-col justify-between p-8 text-left">
+                            <span class="font-serif-eng italic text-stone-600 text-xs tracking-widest">ANIME // MASTERPIECE</span>
+                            <div class="space-y-4 my-auto">
+                                <h4 class="text-lg font-light text-white font-serif-zh tracking-wide">《新世纪福音战士》</h4>
+                                <p class="text-xs text-stone-400 font-serif-zh font-light leading-relaxed">“只要活着，不管在什么地方，到处都会是天堂。因为只要活着，就永远有寻找幸福的机会。”</p>
+                            </div>
+                            <span class="text-[9px] text-stone-700 tracking-widest font-serif-eng">NEON GENESIS EVANGELION.</span>
+                        </div>
                     </div>
-                    <span class="font-serif-eng italic text-stone-700 text-xs">2026 //</span>
+                </div>
+                <div class="flex justify-between items-start pt-1 px-1">
+                    <div>
+                        <h3 class="text-sm font-light font-serif-zh text-stone-300">Evangelion // 绝对领域</h3>
+                        <p class="text-[9px] tracking-widest uppercase text-stone-600 mt-1">Classic Scene / Dialogue</p>
+                    </div>
+                    <span class="font-serif-eng italic text-stone-700 text-xs">A-Side</span>
                 </div>
             </div>
 
-            <!-- 灵感卡片 3：极慢速（数据速差：-100） -->
-            <div class="muse-card space-y-4" data-speed="-100">
-                <div class="overflow-hidden aspect-[1/1] bg-stone-900 rounded-sm">
-                    <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=800" 
-                         class="w-full h-full object-cover grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-700 ease-out scale-105 hover:scale-100" alt="Muse 3">
-                </div>
-                <div class="flex justify-between items-start pt-2">
-                    <div>
-                        <h3 class="text-base font-light font-serif-zh text-stone-300">光的重塑</h3>
-                        <p class="text-[10px] tracking-widest uppercase text-stone-600 mt-1">Light Capture / Architecture</p>
+            <!-- 🃏 卡牌 3：动漫第二弹（极慢速） -->
+            <div class="muse-card space-y-4" data-speed="-80">
+                <div class="card-perspective w-full aspect-[3/4]">
+                    <div class="card-container w-full h-full">
+                        <!-- 正面：高燃或催泪图 -->
+                        <div class="card-front">
+                            <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=600" 
+                                 class="w-full h-full object-cover grayscale opacity-70 hover:opacity-100 transition-all duration-500" alt="Anime 2">
+                        </div>
+                        <!-- 背面：名场面复刻 -->
+                        <div class="card-back flex flex-col justify-between p-8 text-left">
+                            <span class="font-serif-eng italic text-stone-600 text-xs tracking-widest">ANIME // NOSTALGIA</span>
+                            <div class="space-y-4 my-auto">
+                                <h4 class="text-lg font-light text-white font-serif-zh tracking-wide">《数码宝贝》的世界</h4>
+                                <p class="text-xs text-stone-400 font-serif-zh font-light leading-relaxed">“当飞帽杀的《Butter-Fly》前奏响起的时候，我知道，那个属于御台场持着神圣计划的夏天，永远留在了初代被选召的孩子的梦里。”</p>
+                            </div>
+                            <span class="text-[9px] text-stone-700 tracking-widest font-serif-eng">BUTTERFLY EFFECT.</span>
+                        </div>
                     </div>
-                    <span class="font-serif-eng italic text-stone-700 text-xs">2026 //</span>
+                </div>
+                <div class="flex justify-between items-start pt-1 px-1">
+                    <div>
+                        <h3 class="text-sm font-light font-serif-zh text-stone-300">Summer Reminiscence // 飞帽杀</h3>
+                        <p class="text-[9px] tracking-widest uppercase text-stone-600 mt-1">Childhood Dream / Eternal Track</p>
+                    </div>
+                    <span class="font-serif-eng italic text-stone-700 text-xs">A-Side</span>
                 </div>
             </div>
 
-            <!-- 灵感卡片 4：中速飞驰（数据速差：20） -->
-            <div class="muse-card space-y-4 md:-mt-12" data-speed="20">
-                <div class="overflow-hidden aspect-[2/3] bg-stone-900 rounded-sm">
-                    <img src="https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?q=80&w=800" 
-                         class="w-full h-full object-cover grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-700 ease-out scale-105 hover:scale-100" alt="Muse 4">
-                </div>
-                <div class="flex justify-between items-start pt-2">
-                    <div>
-                        <h3 class="text-base font-light font-serif-zh text-stone-300">无声的喧嚣</h3>
-                        <p class="text-[10px] tracking-widest uppercase text-stone-600 mt-1">Texture Memory / Organic</p>
+            <!-- 🃏 卡牌 4：珍藏周边或第二本命（中速飞驰） -->
+            <div class="muse-card space-y-4 md:-mt-10" data-speed="30">
+                <div class="card-perspective w-full aspect-[3/4]">
+                    <div class="card-container w-full h-full">
+                        <!-- 正面 -->
+                        <div class="card-front">
+                            <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600" 
+                                 class="w-full h-full object-cover grayscale opacity-70 hover:opacity-100 transition-all duration-500" alt="Idol 2">
+                        </div>
+                        <!-- 背面 -->
+                        <div class="card-back flex flex-col justify-between p-8 text-left">
+                            <span class="font-serif-eng italic text-stone-600 text-xs tracking-widest">IDOL // MELODY</span>
+                            <div class="space-y-4 my-auto">
+                                <h4 class="text-lg font-light text-white font-serif-zh tracking-wide">耳机里的偏爱</h4>
+                                <p class="text-xs text-stone-400 font-serif-zh font-light leading-relaxed">“只要前奏一响，我就可以在任何疲惫、无聊的社位或实习瞬间，一秒闪回到你用歌声和灯海为我构建的乌托邦。”</p>
+                            </div>
+                            <span class="text-[9px] text-stone-700 tracking-widest font-serif-eng">SOUNDTRACK TO MY LIFE.</span>
+                        </div>
                     </div>
-                    <span class="font-serif-eng italic text-stone-700 text-xs">2026 //</span>
+                </div>
+                <div class="flex justify-between items-start pt-1 px-1">
+                    <div>
+                        <h3 class="text-sm font-light font-serif-zh text-stone-300">Soundtrack // 循环播放</h3>
+                        <p class="text-[9px] tracking-widest uppercase text-stone-600 mt-1">Acoustic Space / Daily Comfort</p>
+                    </div>
+                    <span class="font-serif-eng italic text-stone-700 text-xs">A-Side</span>
                 </div>
             </div>
 
@@ -155,7 +252,7 @@
             gsap.to(blur, { x: e.clientX, y: e.clientY, duration: 0.2 });
         });
 
-        document.querySelectorAll('a, .muse-card img').forEach(item => {
+        document.querySelectorAll('a, .card-container, button').forEach(item => {
             item.addEventListener('mouseenter', () => {
                 cursor.style.width = '24px'; cursor.style.height = '24px';
                 cursor.style.backgroundColor = 'rgba(239,239,239,0.15)';
@@ -166,20 +263,36 @@
             });
         });
 
-        // 🔮 2. 核心：流体交错视差算法 (Fluid Parallax Effect)
-        // 获取所有带有 data-speed 属性的灵感卡片，使其移动速度在滚动时产生分层
+        // 2. 错位流体视差滚动
         document.querySelectorAll('.muse-card').forEach(card => {
             const speed = card.getAttribute('data-speed');
-            
             gsap.to(card, {
                 scrollTrigger: {
                     trigger: card,
-                    start: "top bottom", // 当卡片顶部进入屏幕底部时开始计算
-                    end: "bottom top",   // 当卡片底部离开屏幕顶部时结束
-                    scrub: 1.2           // 阻尼感系数，数字越大，画面滑行越“粘稠”高级
+                    start: "top bottom",
+                    end: "bottom top",
+                    scrub: 1.2
                 },
-                y: speed,               // 运用卡片自带的独特速差值进行Y轴移动
+                y: speed,
                 ease: "none"
+            });
+        });
+
+        // 🔮 3. 核心：点击卡牌 3D 180度翻转交互
+        document.querySelectorAll('.card-container').forEach(card => {
+            card.addEventListener('click', () => {
+                // 切换翻转类名名
+                card.classList.toggle('is-flipped');
+                
+                // 顺便改一下卡片下方的小指示小文字提示
+                const sideIndicator = card.closest('.muse-card').querySelector('.font-serif-eng');
+                if(card.classList.contains('is-flipped')){
+                    sideIndicator.innerText = "B-Side // Note";
+                    sideIndicator.style.color = "#a8a29e"; // 翻过来时字颜色稍微亮一点
+                } else {
+                    sideIndicator.innerText = "A-Side";
+                    sideIndicator.style.color = "#44403c";
+                }
             });
         });
     </script>
