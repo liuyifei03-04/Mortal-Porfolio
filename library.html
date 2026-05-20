@@ -7,7 +7,7 @@
     
     <!-- 稳定的 Tailwind v3 CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- GSAP 核心动效与滚动触发器 -->
+    <!-- GSAP 核心动效库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     
@@ -37,22 +37,57 @@
             pointer-events: none; z-index: 9998;
         }
 
-        /* 🔮 全局唯一悬浮封面容器 */
-        #hover-cover-container {
-            width: 150px;
-            height: 220px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            z-index: 9995; /* 位于普通图层之上，自定义鼠标之下 */
-            border-radius: 6px;
+        /* 🎬 3D 翻书核心舞台 */
+        .book-wrapper {
+            perspective: 1500px; /* 赋予高度写实的 3D 纵深空间感 */
+            width: 140px;
+            height: 200px;
+            position: relative;
+        }
+
+        .book-3d {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+
+        /* 书的底页（写字的那一页） */
+        .book-page-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #f4f1ea; /* 复古纸张色 */
+            color: #222;
+            border-radius: 2px 6px 6px 2px;
+            box-shadow: inset 5px 0 10px rgba(0,0,0,0.15), 0 10px 20px rgba(0,0,0,0.3);
+            transform: translateZ(-1px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        /* 书的封面（可以向左掀开的那一页） */
+        .book-cover-front {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-origin: left center; /* 以左侧书脊为轴心进行翻页 */
+            transform-style: preserve-3d;
+            z-index: 2;
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 4px 0 10px rgba(0,0,0,0.3);
+            border-radius: 2px 6px 6px 2px;
             overflow: hidden;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0.8);
-            transform-origin: center center;
-            transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* 当激活打开状态时，封面呈 3D 掀开 145 度 */
+        .book-wrapper.is-open .book-cover-front {
+            transform: rotateY(-145deg);
         }
 
         /* 胶片噪点 */
@@ -71,11 +106,6 @@
     <div class="grain-overlay"></div>
     <div id="custom-cursor" class="hidden md:block"></div>
     <div id="cursor-blur" class="hidden md:block"></div>
-    
-    <!-- 🔮 鼠标悬浮时会探出来的隐藏封面大盒子 -->
-    <div id="hover-cover-container" class="hidden md:block">
-        <img id="hover-cover-img" src="" class="w-full h-full object-cover" alt="Book Cover">
-    </div>
 
     <!-- HEADER: 顶栏 -->
     <header class="fixed top-0 left-0 w-full z-50 p-6 flex justify-between items-center mix-blend-difference">
@@ -90,16 +120,13 @@
 
     <!-- MAIN CONTAINER -->
     <main class="max-w-5xl mx-auto px-8 py-32 min-h-screen">
-        <p class="text-xs tracking-[0.3em] uppercase opacity-40 mb-24">02 / LIBRARY & TEXTS // HOVER TO SEE COVER</p>
+        <p class="text-xs tracking-[0.3em] uppercase opacity-40 mb-24">02 / LIBRARY & TEXTS // CLICK BOOK TO UNVEIL</p>
 
         <!-- 书籍列表舞台 -->
         <div class="space-y-20 relative z-10">
             
             <!-- ==================== 书籍一 ==================== -->
-            <!-- 💡 注意看这里：新增了 data-cover 属性，放你想要的封面图片网址 -->
-            <div class="book-row border-b border-stone-800 pb-12 flex justify-between items-end group cursor-pointer" 
-                 data-book="book-1" 
-                 data-cover="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600">
+            <div class="book-row border-b border-stone-800 pb-12 flex justify-between items-end group cursor-pointer" data-book="book-1">
                 <div class="flex items-baseline gap-8">
                     <span class="font-serif-eng italic text-stone-600 text-sm tracking-wider">01 //</span>
                     <div>
@@ -113,9 +140,7 @@
             </div>
 
             <!-- ==================== 书籍二 ==================== -->
-            <div class="book-row border-b border-stone-800 pb-12 flex justify-between items-end group cursor-pointer" 
-                 data-book="book-2" 
-                 data-cover="https://images.unsplash.com/photo-1614849185319-5a1a4908c341?q=80&w=600">
+            <div class="book-row border-b border-stone-800 pb-12 flex justify-between items-end group cursor-pointer" data-book="book-2">
                 <div class="flex items-baseline gap-8">
                     <span class="font-serif-eng italic text-stone-600 text-sm tracking-wider">02 //</span>
                     <div>
@@ -129,9 +154,7 @@
             </div>
 
             <!-- ==================== 书籍三 ==================== -->
-            <div class="book-row border-b border-stone-800 pb-12 flex justify-between items-end group cursor-pointer" 
-                 data-book="book-3" 
-                 data-cover="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600">
+            <div class="book-row border-b border-stone-800 pb-12 flex justify-between items-end group cursor-pointer" data-book="book-3">
                 <div class="flex items-baseline gap-8">
                     <span class="font-serif-eng italic text-stone-600 text-sm tracking-wider">03 //</span>
                     <div>
@@ -147,20 +170,44 @@
         </div>
     </main>
 
-    <!-- 侧边弹窗日记本面板 -->
-    <div id="reading-drawer" class="fixed top-0 right-0 h-full w-full md:w-[450px] bg-[#1a1a1a] border-l border-stone-800 z-50 translate-x-full shadow-2xl p-12 flex flex-col justify-between">
+    <!-- 🔮 右侧私密抽屉面板（封面在右侧面板顶部进行3D开箱） -->
+    <div id="reading-drawer" class="fixed top-0 right-0 h-full w-full md:w-[480px] bg-[#161616] border-l border-stone-800 z-50 translate-x-full shadow-2xl p-12 flex flex-col justify-between">
+        
+        <!-- 顶栏控制 -->
         <div class="flex justify-between items-center">
             <span id="drawer-number" class="font-serif-eng italic text-stone-500 text-xs tracking-widest">01 // NOTE</span>
-            <button id="close-drawer" class="text-xs tracking-widest uppercase text-stone-400 hover:text-white transition-colors">Close ✕</button>
+            <button id="close-drawer" class="text-xs tracking-widest uppercase text-stone-400 hover:text-white transition-colors">
+                Close ✕
+            </button>
         </div>
 
-        <div class="my-auto space-y-6">
-            <h4 id="drawer-title" class="text-xl font-light font-serif-zh text-white">书名加载中</h4>
-            <div class="w-8 h-[1px] bg-stone-600"></div>
-            <p id="drawer-quote" class="font-serif-zh text-sm font-light text-[#EFEFEF]/80 leading-relaxed tracking-wide italic">“摘录内容”</p>
+        <!-- 🔮 核心升级区域：右侧面板内的 3D 精装翻书效果舞台 -->
+        <div class="flex justify-center my-6">
+            <div id="drawer-book-wrapper" class="book-wrapper">
+                <div class="book-3d">
+                    <!-- 底页（内页纸张） -->
+                    <div class="book-page-back font-serif-eng text-stone-400">mortal.</div>
+                    <!-- 前封面（可旋转卷开层） -->
+                    <div class="book-cover-front">
+                        <img id="drawer-book-cover" src="" class="w-full h-full object-cover" alt="Book Cover">
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="text-[9px] tracking-widest text-stone-600 uppercase">mortal. // private library records</div>
+        <!-- 下半部分：沉浸式金句区 -->
+        <div class="space-y-4 mb-auto mt-4">
+            <h4 id="drawer-title" class="text-xl font-light font-serif-zh text-white tracking-wide">书名加载中</h4>
+            <div class="w-8 h-[1px] bg-stone-700"></div>
+            <p id="drawer-quote" class="font-serif-zh text-sm font-light text-[#EFEFEF]/70 leading-relaxed tracking-wide italic">
+                “摘录内容”
+            </p>
+        </div>
+
+        <!-- 底部装饰注脚 -->
+        <div class="text-[9px] tracking-widest text-stone-600 uppercase">
+            mortal. // private library records
+        </div>
     </div>
 
     <!-- FOOTER -->
@@ -174,24 +221,15 @@
     <script>
         gsap.registerPlugin(ScrollTrigger);
 
-        // 1. 磁性指针与隐藏封面同步跟随鼠标
+        // 1. 磁性指针基本逻辑
         const cursor = document.getElementById('custom-cursor');
         const blur = document.getElementById('cursor-blur');
-        const coverContainer = document.getElementById('hover-cover-container');
-        const coverImg = document.getElementById('hover-cover-img');
-
         document.addEventListener('mousemove', (e) => {
-            // 原有鼠标坐标
             gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1 });
             gsap.to(blur, { x: e.clientX, y: e.clientY, duration: 0.2 });
-            
-            // 🔮 关键算法：让封面的坐标稍微落后鼠标一点点（产生略微粘稠的空气阻力高级感）
-            // 加 40 像素的偏移，防止封面把鼠标本身完全挡住
-            gsap.to(coverContainer, { x: e.clientX + 40, y: e.clientY + 20, duration: 0.4, ease: "power3.out" });
         });
 
-        // 普通按钮的鼠标放大反应
-        document.querySelectorAll('a, button').forEach(item => {
+        document.querySelectorAll('a, .book-row, button').forEach(item => {
             item.addEventListener('mouseenter', () => {
                 cursor.style.width = '20px'; cursor.style.height = '20px';
                 cursor.style.backgroundColor = 'rgba(239,239,239,0.2)';
@@ -202,34 +240,7 @@
             });
         });
 
-        // 🔮 2. 书籍专属：鼠标悬浮时，“幽灵封面”淡入展现
-        document.querySelectorAll('.book-row').forEach(row => {
-            row.addEventListener('mouseenter', () => {
-                const coverSrc = row.getAttribute('data-cover');
-                if (coverSrc) {
-                    coverImg.src = coverSrc; // 动态更换封面图
-                    // 让封面盒子放大并透明度归1
-                    coverContainer.style.opacity = "1";
-                    coverContainer.style.transform = "translate(-50%, -50%) scale(1) rotate(2deg)"; // 微微带一点斜角更灵动
-                }
-                
-                // 此时让小光圈缩小隐藏，把视觉焦点让给封面
-                cursor.style.opacity = "0";
-                blur.style.opacity = "0";
-            });
-
-            row.addEventListener('mouseleave', () => {
-                // 鼠标移出，封面迅速缩回变透明
-                coverContainer.style.opacity = "0";
-                coverContainer.style.transform = "translate(-50%, -50%) scale(0.8) rotate(0deg)";
-                
-                // 恢复小光圈
-                cursor.style.opacity = "1";
-                blur.style.opacity = "1";
-            });
-        });
-
-        // 3. 视差滚动
+        // 2. 文本列表视差滚动
         document.querySelectorAll('.book-row').forEach((row) => {
             const floatTxt = row.querySelector('.floating-text');
             gsap.to(floatTxt, {
@@ -238,27 +249,32 @@
             });
         });
 
-        // 4. 数据源
+        // 3. 完美封装的数据源（集成封面和名篇金句）
         const bookDatabase = {
             "book-1": {
                 number: "01 // NOTE",
                 title: "《马尔特手记》",
+                cover: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600",
                 quote: "“我正在学习着看。我不知道为什么，我里面的一切都好转了，变得比以前深刻。我有一层内在的自自我也被建立起来了，它以前是从不曾存在过的。现在我看到的一切都走到它里面去了。”"
             },
             "book-2": {
                 number: "02 // NOTE",
-                title: "《荒原狼 slide》",
+                title: "《荒原狼》",
+                cover: "https://images.unsplash.com/photo-1614849185319-5a1a4908c341?q=80&w=600",
                 quote: "“你太追求完美了，我的荒原狼。你对这个粗糙、简陋的世界太严苛了。你身上那头高贵的狼正在撕扯着你作为普通人那一半的血肉。学着去跳舞吧，学着在荒诞中微笑。”"
             },
             "book-3": {
                 number: "03 // NOTE",
                 title: "《存在与时间》",
+                cover: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600",
                 quote: "“向死而生。人是在走向结束的过程中肯定自身的。唯有当我们真正直面个体生命的有限性与死亡时，我们才能将自己从庸俗喧嚣的‘常人’状态中解救出来，真正去过一种本真生活。”"
             }
         };
 
-        // 5. 侧边抽屉面板
+        // 4. 侧边栏及 3D 翻书交互逻辑
         const drawer = document.getElementById('reading-drawer');
+        const dBookWrapper = document.getElementById('drawer-book-wrapper');
+        const dBookCover = document.getElementById('drawer-book-cover');
         const dNumber = document.getElementById('drawer-number');
         const dTitle = document.getElementById('drawer-title');
         const dQuote = document.getElementById('drawer-quote');
@@ -267,22 +283,49 @@
             row.addEventListener('click', () => {
                 const bookKey = row.getAttribute('data-book');
                 const data = bookDatabase[bookKey];
+
                 if (data) {
+                    // 先给书皮复位（闭合状态），防止上次的硬切换穿帮
+                    dBookWrapper.classList.remove('is-open');
+
+                    // 动态替换新内容
                     dNumber.innerText = data.number;
                     dTitle.innerText = data.title;
+                    dBookCover.src = data.cover;
                     dQuote.innerText = data.quote;
-                    gsap.to(drawer, { x: 0, duration: 0.6, ease: "power3.out" });
+
+                    // 第一步：让面板整体平滑滑入
+                    gsap.to(drawer, { 
+                        x: 0, 
+                        duration: 0.6, 
+                        ease: "power3.out",
+                        onComplete: () => {
+                            // 第二步：面板安全到达后，触发 3D 翻书舒展动效
+                            setTimeout(() => {
+                                dBookWrapper.classList.add('is-open');
+                            }, 150);
+                        }
+                    });
                 }
             });
         });
 
-        document.getElementById('close-drawer').addEventListener('click', () => {
-            gsap.to(drawer, { x: "100%", duration: 0.5, ease: "power3.in" });
-        });
+        // 统一优雅收起函数
+        function closeReadingDrawer() {
+            // 先合上书本封面
+            dBookWrapper.classList.remove('is-open');
+            // 延时让侧边栏退回右侧屏幕外
+            setTimeout(() => {
+                gsap.to(drawer, { x: "100%", duration: 0.5, ease: "power3.in" });
+            }, 200);
+        }
 
+        document.getElementById('close-drawer').addEventListener('click', closeReadingDrawer);
+
+        // 点击日记本以外的空白地带自动关闭
         document.addEventListener('click', (e) => {
             if (!drawer.contains(e.target) && !e.target.closest('.book-row')) {
-                gsap.to(drawer, { x: "100%", duration: 0.5, ease: "power3.in" });
+                closeReadingDrawer();
             }
         });
     </script>
