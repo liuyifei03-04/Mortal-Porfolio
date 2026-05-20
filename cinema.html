@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mortal. // Cinema</title>
+    <title>mortal. // Cinema Gallery</title>
     
     <!-- 稳定的 Tailwind v3 CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- GSAP 核心动效与滚动触发器 -->
+    <!-- GSAP 核心动效库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     
@@ -15,7 +15,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@200;400;600&display=swap');
 
         body {
-            background-color: #121212; /* 电影院级别的沉浸黑 */
+            background-color: #121212; /* 沉浸黑 */
             color: #EFEFEF;
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
@@ -44,8 +44,37 @@
             opacity: 0.02; pointer-events: none; z-index: 9990;
         }
 
-        /* 用于支持多图叠放的 3D 容器 */
-        .photo-stack { perspective: 1000px; transform-style: preserve-3d; }
+        /* 3D 舞台卡片堆叠容器 */
+        .card-stack {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            perspective: 1200px;
+            transform-style: preserve-3d;
+        }
+
+        /* 单张剧照卡片的基础样式 */
+        .stacked-card {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-cover: cover;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform-origin: center center;
+            transition: filter 0.6s, opacity 0.6s;
+            cursor: pointer;
+            filter: grayscale(100%) contrast(110%);
+            opacity: 0.5;
+        }
+
+        /* 当悬停或激活亮起时，恢复电影原本的高级色彩 */
+        .photo-stack-zone:hover .stacked-card,
+        .photo-stack-zone.is-hovered .stacked-card {
+            filter: grayscale(0%) contrast(100%);
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="relative selection:bg-stone-200 selection:text-black">
@@ -54,7 +83,7 @@
     <div id="custom-cursor" class="hidden md:block"></div>
     <div id="cursor-blur" class="hidden md:block"></div>
 
-    <!-- HEADER: 顶栏 -->
+    <!-- HEADER -->
     <header class="fixed top-0 left-0 w-full z-50 p-6 flex justify-between items-center mix-blend-difference">
         <a href="index.html" class="text-xl font-light tracking-widest lowercase text-[#EFEFEF]">mortal.</a>
         <div class="flex gap-8 text-[11px] tracking-[0.2em] uppercase font-light text-[#EFEFEF]/60">
@@ -65,71 +94,67 @@
         </div>
     </header>
 
-    <!-- CONTENT: 电影长廊 -->
+    <!-- MAIN GALLERY -->
     <main class="max-w-5xl mx-auto px-8 py-32">
-        <p class="text-xs tracking-[0.3em] uppercase opacity-40 mb-28">01 / CINEMA & IMAGINATION</p>
+        <p class="text-xs tracking-[0.3em] uppercase opacity-40 mb-20">01 / CINEMA & IMAGINATION // CLICK TO SHUFFLE</p>
 
         <!-- ==================== 电影一：《关于莉莉周的一切》 ==================== -->
-        <div class="movie-section min-h-[70vh] flex flex-col md:flex-row gap-12 items-center mb-44">
-            <!-- 视觉大招：三图重叠散开盒子 -->
-            <div class="photo-stack w-full md:w-[55%] aspect-[16/10] relative group cursor-pointer">
-                <!-- 剧照 3（最底层） -->
-                <img src="https://images.unsplash.com/photo-1518173946687-a4c8a383392e?q=80&w=800" 
-                     class="absolute inset-0 w-full h-full object-cover rounded-lg shadow-md transform rotate-3 group-hover:rotate-12 group-hover:translate-x-12 group-hover:-translate-y-4 transition-all duration-700 filter grayscale contrast-125 opacity-40 group-hover:opacity-60 group-hover:grayscale-0">
-                <!-- 剧照 2（中间层） -->
-                <img src="https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?q=80&w=800" 
-                     class="absolute inset-0 w-full h-full object-cover rounded-lg shadow-lg transform -rotate-2 group-hover:-rotate-6 group-hover:-translate-x-8 group-hover:-translate-y-2 transition-all duration-700 filter grayscale contrast-125 opacity-60 group-hover:opacity-80 group-hover:grayscale-0">
-                <!-- 剧照 1（最上层 - 主图） -->
-                <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1200" 
-                     class="absolute inset-0 w-full h-full object-cover rounded-lg shadow-2xl transition-all duration-700 filter grayscale contrast-125 group-hover:grayscale-0">
+        <div class="movie-section min-h-[75vh] flex flex-col md:flex-row gap-16 items-center mb-44">
+            
+            <!-- 升级大招：带交互触控的堆叠重叠区域 -->
+            <div class="photo-stack-zone w-full md:w-[55%] aspect-[16/10]">
+                <div class="card-stack" data-movie="lily-chou">
+                    <!-- 顺序从上到下，最后一张会初始在最上面（你可以直接换成真剧照网址） -->
+                    <img src="https://images.unsplash.com/photo-1518173946687-a4c8a383392e?q=80&w=800" class="stacked-card" alt="剧照3">
+                    <img src="https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?q=80&w=800" class="stacked-card" alt="剧照2">
+                    <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1200" class="stacked-card" alt="剧照1（初始封面）">
+                </div>
             </div>
-            <!-- 文字侧边栏 -->
-            <div class="w-full md:w-[40%] text-left mt-6 md:mt-0">
+            
+            <!-- 文字解说 -->
+            <div class="w-full md:w-[35%] text-left">
                 <span class="text-[10px] tracking-widest text-stone-500 uppercase font-light">FILM // 01</span>
                 <h3 class="font-serif italic text-2xl font-light text-white mt-1 mb-4">关于莉莉周的一切</h3>
-                <p class="text-xs font-light text-[#EFEFEF]/60 leading-relaxed tracking-wide">
+                <p class="text-xs font-light text-[#EFEFEF]/60 leading-relaxed tracking-wide mb-4">
                     “我在这里。借着以太的力量，我就在青翠的麦田里，聆听那些残酷的青春细语。”
                 </p>
+                <div class="text-[9px] uppercase tracking-widest text-stone-600 animate-pulse">⚡ Hover to Spread / Click to Next</div>
             </div>
         </div>
 
         <!-- ==================== 电影二：《过春天》 ==================== -->
-        <div class="movie-section min-h-[70vh] flex flex-col md:flex-row-reverse gap-12 items-center mb-44">
-            <!-- 三图重叠散开盒子 -->
-            <div class="photo-stack w-full md:w-[55%] aspect-[16/10] relative group cursor-pointer">
-                <!-- 剧照 3 -->
-                <img src="https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?q=80&w=800" 
-                     class="absolute inset-0 w-full h-full object-cover rounded-lg shadow-md transform -rotate-4 group-hover:-rotate-12 group-hover:-translate-x-12 group-hover:-translate-y-4 transition-all duration-700 filter grayscale contrast-125 opacity-40 group-hover:opacity-60 group-hover:grayscale-0">
-                <!-- 剧照 2 -->
-                <img src="https://images.unsplash.com/photo-1472214222555-d404758b1c42?q=80&w=800" 
-                     class="absolute inset-0 w-full h-full object-cover rounded-lg shadow-lg transform rotate-2 group-hover:rotate-6 group-hover:translate-x-8 group-hover:-translate-y-2 transition-all duration-700 filter grayscale contrast-125 opacity-60 group-hover:opacity-80 group-hover:grayscale-0">
-                <!-- 剧照 1 -->
-                <img src="https://images.unsplash.com/photo-1514306191717-452ec28c7814?q=80&w=1200" 
-                     class="absolute inset-0 w-full h-full object-cover rounded-lg shadow-2xl transition-all duration-700 filter grayscale contrast-125 group-hover:grayscale-0">
+        <div class="movie-section min-h-[75vh] flex flex-col md:flex-row-reverse gap-16 items-center mb-44">
+            
+            <div class="photo-stack-zone w-full md:w-[55%] aspect-[16/10]">
+                <div class="card-stack" data-movie="the-crossing">
+                    <img src="https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?q=80&w=800" class="stacked-card" alt="剧照3">
+                    <img src="https://images.unsplash.com/photo-1472214222555-d404758b1c42?q=80&w=800" class="stacked-card" alt="剧照2">
+                    <img src="https://images.unsplash.com/photo-1514306191717-452ec28c7814?q=80&w=1200" class="stacked-card" alt="剧照1（初始封面）">
+                </div>
             </div>
-            <!-- 文字侧边栏 -->
-            <div class="w-full md:w-[40%] text-left mt-6 md:mt-0">
+            
+            <div class="w-full md:w-[35%] text-left">
                 <span class="text-[10px] tracking-widest text-stone-500 uppercase font-light">FILM // 02</span>
                 <h3 class="font-serif italic text-2xl font-light text-white mt-1 mb-4">过春天</h3>
-                <p class="text-xs font-light text-[#EFEFEF]/60 leading-relaxed tracking-wide">
+                <p class="text-xs font-light text-[#EFEFEF]/60 leading-relaxed tracking-wide mb-4">
                     “香港的雨，深圳的太阳。十六岁的少女身上绑着微弱的轰鸣，那是我义无反顾游过去的一场春天。”
                 </p>
+                <div class="text-[9px] uppercase tracking-widest text-stone-600 animate-pulse">⚡ Hover to Spread / Click to Next</div>
             </div>
         </div>
 
     </main>
 
-    <!-- 极简返回大厅注脚 -->
+    <!-- FOOTER -->
     <footer class="py-20 text-center">
         <a href="index.html" class="inline-block text-[10px] tracking-[0.25em] uppercase border border-[#EFEFEF]/20 rounded-full px-6 py-2.5 hover:bg-[#EFEFEF] hover:text-[#121212] transition-all duration-500">
             ← Return To Main Hall
         </a>
     </footer>
 
+    <!-- 全套核心交互算法 -->
     <script>
-        gsap.registerPlugin(ScrollTrigger);
-
-        // 1. 磁性鼠标跟随
+        // 1. 磁性呼吸指针
         const cursor = document.getElementById('custom-cursor');
         const blur = document.getElementById('cursor-blur');
         document.addEventListener('mousemove', (e) => {
@@ -137,11 +162,10 @@
             gsap.to(blur, { x: e.clientX, y: e.clientY, duration: 0.2 });
         });
 
-        // 鼠标悬停在卡片上时鼠标圈变成大十字或特定样式
-        document.querySelectorAll('a, .photo-stack').forEach(item => {
+        document.querySelectorAll('a, .stacked-card').forEach(item => {
             item.addEventListener('mouseenter', () => {
-                cursor.style.width = '20px'; cursor.style.height = '20px';
-                cursor.style.backgroundColor = 'rgba(239,239,239,0.2)';
+                cursor.style.width = '24px'; cursor.style.height = '24px';
+                cursor.style.backgroundColor = 'rgba(239,239,239,0.15)';
             });
             item.addEventListener('mouseleave', () => {
                 cursor.style.width = '8px'; cursor.style.height = '8px';
@@ -149,18 +173,91 @@
             });
         });
 
-        // 2. 电影内容在滚动进入视口时慢速无感淡入
+        // 2. 电影卡片初始化与核心算法调度
+        document.querySelectorAll('.card-stack').forEach((stack) => {
+            // 获取这个影集下的所有单张剧照卡片
+            let cards = Array.from(stack.querySelectorAll('.stacked-card'));
+            let isHovered = false;
+
+            // 核心功能：刷新渲染所有卡片的 3D 空间位置
+            function renderCards() {
+                cards.forEach((card, index) => {
+                    // zIndex 决定谁在最上面（靠后的元素数字大，在顶层）
+                    card.style.zIndex = index;
+                    
+                    if (!isHovered) {
+                        // 状态A：平静状态，紧密重叠在一起，带有微弱的后仰深度
+                        gsap.to(card, {
+                            x: 0, y: 0,
+                            z: -index * 15,
+                            rotationZ: (index - cards.length + 1) * 2, 
+                            duration: 0.6, ease: "power2.out"
+                        });
+                    } else {
+                        // 状态B：鼠标滑过亮起状态，卡片如同扇子般大角度优雅散开
+                        let multiplier = index - (cards.length - 1) / 2;
+                        gsap.to(card, {
+                            x: multiplier * 50, // 左右错开
+                            y: Math.abs(multiplier) * -10, // 形成一条好看的弧线
+                            z: index * 10,
+                            rotationZ: multiplier * 6, // 旋转折扇角度
+                            duration: 0.6, ease: "power2.out"
+                        });
+                    }
+                });
+            }
+
+            // 初始化卡片排列
+            renderCards();
+
+            // 监听鼠标移入：亮起并切入“散开”姿态
+            const parentZone = stack.closest('.photo-stack-zone');
+            parentZone.addEventListener('mouseenter', () => {
+                isHovered = true;
+                parentZone.classList.add('is-hovered');
+                renderCards();
+            });
+
+            // 监听鼠标移出：恢复“闭合”姿态
+            parentZone.addEventListener('mouseleave', () => {
+                isHovered = false;
+                parentZone.classList.remove('is-hovered');
+                renderCards();
+            });
+
+            // ⚡ 监听核心点击大招：切牌动作
+            stack.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                // 找到当前处于最顶层、用户能直接看到的那张卡片（数组的末尾）
+                const topCard = cards[cards.length - 1];
+                
+                // 酷炫的飞牌动画：先把最上面的卡片往右上方飞出去，淡出
+                gsap.to(topCard, {
+                    x: 200, y: -60, rotationZ: 15, opacity: 0, scale: 0.85,
+                    duration: 0.3, ease: "power2.in",
+                    onComplete: () => {
+                        // 动画做完后，把最上面这张牌从数组尾部挪到数组开头（变成最底层）
+                        cards.unshift(cards.pop());
+                        
+                        // 重新刷新堆叠层级
+                        cards.forEach((c, idx) => c.style.zIndex = idx);
+                        
+                        // 让刚刚飞出去的牌在最底层悄悄归位，并平滑恢复半透明淡入
+                        gsap.fromTo(topCard, 
+                            { x: 0, y: 0, z: -40, rotationZ: 0, opacity: 0 },
+                            { opacity: isHovered ? 1 : 0.5, duration: 0.4, onComplete: renderCards }
+                        );
+                    }
+                });
+            });
+        });
+
+        // 3. 电影馆滚动入场淡入
         document.querySelectorAll('.movie-section').forEach((section) => {
             gsap.from(section, {
-                scrollTrigger: {
-                    trigger: section,
-                    start: "top 85%",
-                    toggleActions: "play none none reverse"
-                },
-                opacity: 0,
-                y: 40,
-                duration: 1.2,
-                ease: "power2.out"
+                scrollTrigger: { trigger: section, start: "top 85%", toggleActions: "play none none reverse" },
+                opacity: 0, y: 40, duration: 1.2, ease: "power2.out"
             });
         });
     </script>
